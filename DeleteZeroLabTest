@@ -1,0 +1,110 @@
+
+  /*программа удаляет нули из последовательности '110010100010101011010111' и записывает в файл  */
+
+import java.io.*;
+
+public class DeleteZeroLabTest1 {
+    private static CharArrayReader in;
+    private static BufferedWriter out;
+    private static int buff = 100;
+
+    public static void main(String[] args) throws IOException {
+
+        String s = "1110111101011110101111000";
+        File fileName = new File("d:/temp/1_1.txt");
+
+        in = new CharArrayReader(s.toCharArray());
+
+        out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF8"));
+
+        filter(in, out, buff);
+        in.close();
+        out.flush();
+        out.close();
+        System.out.println();
+
+
+    }
+
+
+    public static void filter(CharArrayReader in, BufferedWriter out, int buffSize) throws IOException {
+        char[] buff = new char[buffSize];
+        int count;
+        while ((count = in.read(buff)) != -1) {
+            State state = new ZERO(out);
+            System.out.println(count + " count");
+            for (int index = 0; index < count; index++) {
+                state = state.next(buff[index]);
+            }
+            state.finish();
+        }
+    }
+}
+
+abstract class State {
+    protected final BufferedWriter out;
+
+    protected State(BufferedWriter out) {
+        this.out = out;
+    }
+
+    public abstract State next(char value) throws IOException;
+
+    public void finish() throws IOException {
+    }
+}
+
+class ZERO extends State {
+    public ZERO(BufferedWriter out) {
+        super(out);
+    }
+
+    public State next(char value) throws IOException {
+        if (value == '0') {
+            return this;
+        } else {
+            return new NUMBERS(out);
+        }
+    }
+
+    public void finish() throws IOException {
+    }
+}
+
+class NUMBERS extends State {
+
+    private CharArrayWriter buff = new CharArrayWriter();
+    private static int pos;
+
+    protected NUMBERS(BufferedWriter out) {
+        super(out);
+    }
+
+    public State next(char value) throws IOException {
+        if (value == '0') {
+            out.write('1');
+            System.out.println(buff.size());
+
+            if (buff.size() > 0){
+            for (int i = 0; i < buff.size() ; i++) {
+                out.write('1');
+            }}
+            return new ZERO(out);
+        } else {
+            buff.write('1');
+            buff.flush();
+            return this;
+        }
+    }
+
+    public void finish() throws IOException {
+        out.write('1');
+        System.out.println(buff.size());
+        if (buff.size() > 0){
+
+            for (int i = 0; i < buff.size() ; i++) {
+                out.write('1');
+            }}
+
+    }
+}
